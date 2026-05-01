@@ -1,27 +1,44 @@
-# AGENTS.md
+**Scope:** This repository contains a .NET 10 MSTest AI evaluation harness and AI-only architecture-boundary scaffold.
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+<not_yet_implemented>
+</not_yet_implemented>
 
-## Project
+## Live Evaluation Harness
+**does:** Runs Azure OpenAI responses through `Microsoft.Extensions.AI.Evaluation.Quality`, prerelease Foundry safety evaluators, and disk-backed `ScenarioRun` reporting under `.artifacts/evaluation`.
+**does_not_do:** Fail test initialization when live Azure OpenAI or Foundry auth is missing; those cases are inconclusive with a clear message.
 
-MSTest-based AI evaluation test suite targeting .NET 10. Tests exercise Azure OpenAI chat completions via `Microsoft.Extensions.AI`, evaluate response quality using `Microsoft.Extensions.AI.Evaluation.Quality`, evaluate content safety using the prerelease `Microsoft.Extensions.AI.Evaluation.Safety` package, and persist/cache evaluation results with `Microsoft.Extensions.AI.Evaluation.Reporting`.
+## AI-Only Framework
+**does:** Runs JSONL scenario packs through `AiOnlyEval.Core`, `AiOnlyEval.SampleApp`, and `AiOnlyEval.Runner`; validates monolith and microservice boundary contracts, tool calls, source traces, reviewer verdicts, and hard gates.
+**does_not_do:** Require human/manual review gates; allow missing required service traces, required tools, or source traceability when strict gates are enabled.
 
-Authentication uses `Azure.Identity` (`DefaultAzureCredential`). `AZURE_OPENAI_ENDPOINT` is required in user secrets or environment variables. `AZURE_TENANT_ID` is optional. `AZURE_OPENAI_DEPLOYMENT` is optional and defaults to `gpt-5`.
+## Sample Architecture
+**does:** Implements `monolith` as `MonolithAiPipeline` plus in-process stages and `microservices` as `ConversationOrchestratorService` calling service components over `http-json` trace edges.
+**does_not_do:** Call external production services or perform destructive/sample-forbidden tools such as `refund.issue`, `payment.capture`, or `account.delete`.
 
-Foundry safety tests additionally require `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, and `AZURE_AI_PROJECT` for a hub-based Azure AI Foundry project that supports the Evaluation service.
+## Scaffold Generator
+**does:** Regenerates the SDK facade, Codex reviewer agents, AI-only policy, service-boundary contracts, Codex review prompt/schema, and project Codex config.
+**does_not_do:** Generate product-specific system-under-test adapters; implement those behind `IAiSystemUnderTest`.
+
+## Patterns
+- Build and test through `TestAI.slnx`.
+- Keep central package versions in `Directory.Packages.props`.
+- Use `TimeProvider.System.GetUtcNow()` for generated timestamps.
+- Mark live evaluation tests `[DoNotParallelize]`.
+- Represent architecture calls with `ServiceTrace.Metadata["caller"]` and `ServiceTrace.Metadata["transport"]`.
+- Use `Assert.Inconclusive` for missing live credentials or unavailable live evaluation services.
+
+## Anti-Patterns
+- Building only one project when solution-level integration changed.
+- Inline package versions in project files.
+- `DateTimeOffset.UtcNow` or `DateTime.UtcNow` for timestamps.
+- Method-parallel live model/reporting tests.
+- Service-boundary validation from service names alone.
+- Failing tests for missing live credentials that should be optional locally.
 
 ## Build & Test
-
-```bash
-dotnet build TestAI.slnx
-dotnet test TestAI.slnx                    # run all tests
-dotnet test TestAI.slnx --filter GeneralAnswerQualityAndPromptContract
-dotnet tool restore
-dotnet tool run aieval report --path .artifacts/evaluation --output .artifacts/evaluation/report.html
-```
-
-Tests require Azure OpenAI access. Safety tests also require Azure AI Foundry Evaluation service access. Missing endpoint/auth/Foundry config should make live evaluation tests inconclusive with a clear message, not fail during initialization. Evaluation artifacts are written under `.artifacts/evaluation/`.
-
-## Architecture
-
-Single-project solution (`TestAI/`). `MyTests.cs` owns the live evaluation harness, creates disk-backed `ScenarioRun` instances, samples responses through the scenario chat configuration so response caching applies, and validates LLM-as-judge quality metrics, Foundry-backed safety metrics, and small local prompt-contract metrics. `MSTestSettings.cs` enables method-level parallelism for the assembly, but live evaluation tests are marked `[DoNotParallelize]`.
+- `dotnet build TestAI.slnx`
+- `dotnet test TestAI.slnx`
+- `dotnet test TestAI.slnx --filter GeneralAnswerQualityAndPromptContract`
+- `dotnet tool restore`
+- `dotnet tool run aieval report --path .artifacts/evaluation --output .artifacts/evaluation/report.html`
+- `dotnet run --project eng/AiOnlyEval.ScaffoldGenerator/AiOnlyEval.ScaffoldGenerator.csproj`

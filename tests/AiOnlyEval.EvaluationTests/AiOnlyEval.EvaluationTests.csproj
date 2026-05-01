@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/AiOnlyEval.Core/AiOnlyEval.Core.csproj" />
+    <ProjectReference Include="../../src/AiOnlyEval.SampleApp/AiOnlyEval.SampleApp.csproj" />
+  </ItemGroup>
+</Project>

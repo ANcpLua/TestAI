@@ -8,17 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
-    <PackageReference Include="Azure.Identity" Version="1.21.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation" Version="10.5.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.5.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" Version="10.5.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Safety" Version="10.5.0-preview.1.26213.4" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.7" />
-    <PackageReference Include="MSTest" Version="4.0.2" />
+    <PackageReference Include="Azure.AI.OpenAI" />
+    <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Safety" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="MSTest" />
   </ItemGroup>
 
   <ItemGroup>

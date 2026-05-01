@@ -1,0 +1,91 @@
+name: AI-only evaluation gates
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  dotnet-ai-evals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AI_EVAL_REVIEW_MODEL: ${{ vars.AI_EVAL_REVIEW_MODEL || 'gpt-4.1' }}
+      AI_EVAL_ARTIFACT_DIR: ${{ github.workspace }}/artifacts/ai-eval
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore tests/AiOnlyEval.EvaluationTests/AiOnlyEval.EvaluationTests.csproj
+
+      - name: Unit and service-boundary tests
+        run: dotnet test tests/AiOnlyEval.EvaluationTests/AiOnlyEval.EvaluationTests.csproj --configuration Release --logger "trx;LogFileName=ai-eval-tests.trx" --results-directory artifacts/test-results
+
+      - name: AI-only evaluation runner
+        run: |
+          dotnet run --configuration Release --project src/AiOnlyEval.Runner/AiOnlyEval.Runner.csproj -- \
+            --scenario evals/scenarios/refund-policy.jsonl \
+            --scenario evals/scenarios/security.jsonl \
+            --out artifacts/ai-eval
+
+      - name: Install Microsoft AI eval report tool
+        run: dotnet tool install --create-manifest-if-needed Microsoft.Extensions.AI.Evaluation.Console --version 10.5.0
+
+      - name: Generate Microsoft-style report when storage exists
+        shell: bash
+        run: |
+          if [ -d artifacts/microsoft-eval ]; then
+            dotnet tool run aieval report --path artifacts/microsoft-eval --output artifacts/ai-eval/microsoft-aieval-report.html
+          else
+            echo "No Microsoft disk-based eval storage found; scaffold report is in artifacts/ai-eval/index.html"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-only-evaluation-artifacts
+          path: |
+            artifacts/ai-eval/**
+            artifacts/test-results/**
+
+  codex-ai-review:
+    runs-on: ubuntu-latest
+    needs: dotnet-ai-evals
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      final_message: ${{ steps.run_codex.outputs.final-message }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Run Codex AI reviewer panel
+        id: run_codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/ai-reviewer-orchestrator.md
+          output-file: artifacts/codex/codex-ai-review.json
+          safety-strategy: drop-sudo
+          sandbox: workspace-write
+          codex-args: >-
+            --output-schema .github/codex/schemas/codex-ai-review.schema.json
+
+      - name: Validate Codex JSON review gate
+        run: node scripts/validate-codex-review.mjs artifacts/codex/codex-ai-review.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codex-ai-review
+          path: artifacts/codex/**

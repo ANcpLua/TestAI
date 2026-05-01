@@ -1,3 +1,8 @@
 <Solution>
   <Project Path="TestAI/TestAI.csproj" />
+  <Project Path="src/AiOnlyEval.Core/AiOnlyEval.Core.csproj" />
+  <Project Path="src/AiOnlyEval.SampleApp/AiOnlyEval.SampleApp.csproj" />
+  <Project Path="src/AiOnlyEval.Runner/AiOnlyEval.Runner.csproj" />
+  <Project Path="eng/AiOnlyEval.ScaffoldGenerator/AiOnlyEval.ScaffoldGenerator.csproj" />
+  <Project Path="tests/AiOnlyEval.EvaluationTests/AiOnlyEval.EvaluationTests.csproj" />
 </Solution>
