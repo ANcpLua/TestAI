@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" Version="10.5.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Safety" Version="10.5.0-preview.1.26213.4" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.7" />
